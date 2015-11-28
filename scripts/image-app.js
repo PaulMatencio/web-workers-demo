@@ -43,8 +43,10 @@
     // Hint! This is where you should post messages to the web worker and
     // receive messages from the web worker.
 
+    /*  No web wroker
     length = imageData.data.length / 4;
-    for (i = j = 0, ref = length; 0 <= ref ? j <= ref : j >= ref; i = 0 <= ref ? ++j : --j) {
+    //for (i = j = 0, ref = length; 0 <= ref ? j <= ref : j >= ref; i = 0 <= ref ? ++j : --j) {
+    for (i=0 ;i < length; i++) {  
       r = imageData.data[i * 4 + 0];
       g = imageData.data[i * 4 + 1];
       b = imageData.data[i * 4 + 2];
@@ -55,12 +57,31 @@
       imageData.data[i * 4 + 2] = pixel[2];
       imageData.data[i * 4 + 3] = pixel[3];
     }
+    */
+
+    /* utilize web worker */
+    var data = {} ;
+    data.imageData=imageData;
+    data.type=type;
+    myWorker.postMessage(data);
+    
+    /*
     toggleButtonsAbledness();
     return ctx.putImageData(imageData, 0, 0);
+    */
   };
 
   function revertImage() {
     return ctx.putImageData(original, 0, 0);
+  }
+
+  // start a web worker  instance
+  var myWorker = new Worker("scripts/worker.js");
+  myWorker.onmessage = function(e) {
+    imageData = e.data;
+    toggleButtonsAbledness();
+    ctx.putImageData(imageData, 0, 0);
+    //console.log('Message received from worker');
   }
 
   document.querySelector('#invert').onclick = function() {
